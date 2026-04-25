@@ -258,8 +258,8 @@ const Dashboard = () => {
                                         ))}
                                         {friendRequests.map((req, i) => (
                                             <div key={`req-${i}`} className="glass-panel" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <span style={{ fontSize: '0.9rem' }}>{req.username} wants to join squad</span>
-                                                <button onClick={() => acceptRequest(req.username)} style={{ background: 'var(--primary)', border: 'none', borderRadius: '8px', padding: '0.5rem', color: 'black', cursor: 'pointer' }}><Check size={18}/></button>
+                                                <span style={{ fontSize: '0.9rem' }}><b>{req}</b> wants to join squad</span>
+                                                <button onClick={() => acceptRequest(req)} style={{ background: 'var(--primary)', border: 'none', borderRadius: '8px', padding: '0.5rem', color: 'black', cursor: 'pointer' }}><Check size={18}/></button>
                                             </div>
                                         ))}
                                     </div>
