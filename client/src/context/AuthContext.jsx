@@ -15,14 +15,19 @@ export const AuthProvider = ({ children }) => {
             const parsedUser = JSON.parse(storedUser);
             setUser(parsedUser);
             // Verify token/get fresh stats
-            axios.get(`${API_URL}/api/auth/me`, {
-                headers: { Authorization: `Bearer ${parsedUser.token}` }
-            }).then(res => {
-                setUser({ ...parsedUser, stats: res.data.stats, friends: res.data.friends });
-            }).catch(() => {
+            if (parsedUser.token) {
+                axios.get(`${API_URL}/api/auth/me`, {
+                    headers: { Authorization: `Bearer ${parsedUser.token}` }
+                }).then(res => {
+                    setUser({ ...parsedUser, stats: res.data.stats, friends: res.data.friends });
+                }).catch(() => {
+                    localStorage.removeItem('user');
+                    setUser(null);
+                });
+            } else {
                 localStorage.removeItem('user');
                 setUser(null);
-            });
+            }
         }
         setLoading(false);
     }, []);
