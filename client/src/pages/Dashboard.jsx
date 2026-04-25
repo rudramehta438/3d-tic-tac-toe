@@ -46,6 +46,11 @@ const Dashboard = () => {
                 fetchRequests();
             });
 
+            socket.on('connect_error', (err) => {
+                console.error('Socket connection error:', err);
+                setError(`Connection Error: ${err.message}. Check if API URL is correct.`);
+            });
+
             socket.on('error_message', ({ message }) => {
                 setError(message);
                 setTimeout(() => setError(''), 4000);
