@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import socket from '../services/socket';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Monitor, Trophy, LogOut, MessageSquare, Plus, Bell, Crown, ChevronRight } from 'lucide-react';
+import { Users, Monitor, Trophy, LogOut, Plus, Crown, X, Check, Search } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const API_URL = import.meta.env.VITE_API_URL || 'https://threed-tic-tac-toe-uzni.onrender.com';
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
@@ -40,12 +40,12 @@ const Dashboard = () => {
 
     const fetchData = async () => {
         try {
+            const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
             const [friendsRes, requestsRes, leaderboardRes] = await Promise.all([
-                axios.get(`${API_URL}/api/friends`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
-                axios.get(`${API_URL}/api/friends/requests`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
+                axios.get(`${API_URL}/api/friends`, config),
+                axios.get(`${API_URL}/api/friends/requests`, config),
                 axios.get(`${API_URL}/api/auth/leaderboard`)
             ]);
-            console.log("Friends Data:", friendsRes.data);
             setFriends(friendsRes.data);
             setFriendRequests(requestsRes.data);
             setLeaderboard(leaderboardRes.data);
@@ -53,17 +53,31 @@ const Dashboard = () => {
     };
 
     const sendFriendRequest = async () => {
+        if (!friendName) return;
         try {
             await axios.post(`${API_URL}/api/friends/request`, { friendUsername: friendName }, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
             setFriendName('');
+            setError('REQUEST SENT!');
+            setTimeout(() => setError(''), 3000);
             fetchData();
-        } catch (err) { setError(err.response?.data?.message || 'Failed to send request'); }
+        } catch (err) { setError(err.response?.data?.message || 'Failed to send'); }
+    };
+
+    const acceptRequest = async (username) => {
+        try {
+            await axios.post(`${API_URL}/api/friends/accept`, { friendUsername: username }, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            fetchData();
+        } catch (err) { console.error('Accept failed'); }
     };
 
     const handleInvite = (friend) => {
         socket.emit('invite_friend', { invitedBy: user.username, friendName: friend });
+        setError(`CHALLENGE SENT TO ${friend}!`);
+        setTimeout(() => setError(''), 3000);
     };
 
     return (
@@ -79,21 +93,21 @@ const Dashboard = () => {
             >
                 <div>
                     <h2 className="gradient-text" style={{ fontSize: '1.2rem', letterSpacing: '4px' }}>COMMAND CENTER</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '700' }}>OPERATOR: {user?.username?.toUpperCase()}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '900' }}>OPERATOR: {user?.username?.toUpperCase()}</p>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <motion.button 
                         whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                         onClick={() => setIsSocialOpen(true)}
-                        style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', padding: '0.8rem', borderRadius: '15px', color: 'white', position: 'relative' }}
+                        style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', padding: '0.8rem', borderRadius: '15px', color: 'white', cursor: 'pointer', position: 'relative' }}
                     >
                         <Users size={20} />
-                        {friendRequests.length > 0 && <span style={{ position: 'absolute', top: -5, right: -5, background: 'var(--accent)', width: '15px', height: '15px', borderRadius: '50%', fontSize: '10px' }}>{friendRequests.length}</span>}
+                        {(friendRequests.length + invitations.length) > 0 && <span style={{ position: 'absolute', top: -5, right: -5, background: 'var(--accent)', width: '18px', height: '18px', borderRadius: '50%', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900' }}>{friendRequests.length + invitations.length}</span>}
                     </motion.button>
                     <motion.button 
                         whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,0,85,0.1)' }} whileTap={{ scale: 0.9 }}
                         onClick={logout}
-                        style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', padding: '0.8rem', borderRadius: '15px', color: 'var(--accent)' }}
+                        style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', padding: '0.8rem', borderRadius: '15px', color: 'var(--accent)', cursor: 'pointer' }}
                     >
                         <LogOut size={20} />
                     </motion.button>
@@ -179,57 +193,76 @@ const Dashboard = () => {
                         />
                         <motion.div 
                             initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-                            style={{ position: 'fixed', right: 0, top: 0, height: '100vh', width: '100%', maxWidth: '400px', background: 'var(--bg-dark)', zIndex: 1001, padding: '3rem', borderLeft: '1px solid var(--glass-border)' }}
+                            style={{ position: 'fixed', right: 0, top: 0, height: '100vh', width: '100%', maxWidth: '420px', background: 'var(--bg-dark)', zIndex: 1001, padding: '2.5rem', borderLeft: '1px solid var(--glass-border)', overflowY: 'auto' }}
                         >
-                            <h2 style={{ fontSize: '1.2rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between' }}>
-                                SOCIAL HUB <button onClick={() => setIsSocialOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer' }}>✕</button>
-                            </h2>
-
-                            {/* Friend Search */}
-                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
-                                <input 
-                                    type="text" placeholder="FIND OPERATOR..." value={friendName}
-                                    onChange={(e) => setFriendName(e.target.value)}
-                                    style={{ flex: 1, padding: '0.8rem', background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '12px', color: 'white' }}
-                                />
-                                <motion.button whileTap={{ scale: 0.9 }} onClick={sendFriendRequest} style={{ padding: '0.8rem', background: 'var(--primary)', border: 'none', borderRadius: '12px', color: 'black' }}><Plus size={20}/></motion.button>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                <h2 style={{ fontSize: '1rem', letterSpacing: '2px' }}>SOCIAL HUB</h2>
+                                <button onClick={() => setIsSocialOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer' }}><X size={24}/></button>
                             </div>
 
-                            {/* Active Invites */}
-                            {invitations.length > 0 && (
-                                <div style={{ marginBottom: '2rem' }}>
-                                    <p style={{ color: 'var(--accent)', fontSize: '0.7rem', marginBottom: '1rem' }}>INCOMING CHALLENGES</p>
-                                    {invitations.map((inviter, i) => (
-                                        <motion.div key={i} initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="glass-panel" style={{ padding: '1rem', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                                            <span>{inviter}</span>
-                                            <button onClick={() => navigate(`/game/online?room=room_${inviter}_${user.username}&players=${inviter},${user.username}&turn=X`)} style={{ background: 'var(--success)', border: 'none', borderRadius: '5px', padding: '0.3rem 0.8rem', fontSize: '0.7rem' }}>ACCEPT</button>
-                                        </motion.div>
-                                    ))}
+                            {/* Section 1: Find Operators */}
+                            <div style={{ marginBottom: '2.5rem' }}>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginBottom: '1rem', letterSpacing: '2px' }}>FIND OPERATORS</p>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <div style={{ flex: 1, position: 'relative' }}>
+                                        <Search size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                                        <input 
+                                            type="text" placeholder="ENTER USERNAME..." value={friendName}
+                                            onChange={(e) => setFriendName(e.target.value)}
+                                            style={{ width: '100%', padding: '1rem 1rem 1rem 3rem', background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: '15px', color: 'white' }}
+                                        />
+                                    </div>
+                                    <motion.button whileTap={{ scale: 0.9 }} onClick={sendFriendRequest} style={{ width: '50px', background: 'var(--primary)', border: 'none', borderRadius: '15px', color: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Plus size={24}/></motion.button>
+                                </div>
+                                {error && <p style={{ fontSize: '0.7rem', color: 'var(--primary)', marginTop: '0.5rem', fontWeight: '700' }}>{error}</p>}
+                            </div>
+
+                            {/* Section 2: Incoming Requests */}
+                            {(friendRequests.length > 0 || invitations.length > 0) && (
+                                <div style={{ marginBottom: '2.5rem' }}>
+                                    <p style={{ color: 'var(--accent)', fontSize: '0.7rem', marginBottom: '1rem', letterSpacing: '2px' }}>PENDING ACTIONS</p>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                        {invitations.map((inviter, i) => (
+                                            <div key={`inv-${i}`} className="glass-panel" style={{ padding: '1rem', border: '1px solid var(--success)', background: 'rgba(0,255,170,0.05)' }}>
+                                                <p style={{ fontSize: '0.8rem', marginBottom: '0.8rem' }}>GAME CHALLENGE: <b>{inviter}</b></p>
+                                                <button onClick={() => navigate(`/game/online?room=room_${inviter}_${user.username}&players=${inviter},${user.username}&turn=X`)} style={{ width: '100%', background: 'var(--success)', border: 'none', borderRadius: '8px', padding: '0.6rem', color: 'black', fontWeight: '800', cursor: 'pointer' }}>ACCEPT & PLAY</button>
+                                            </div>
+                                        ))}
+                                        {friendRequests.map((req, i) => (
+                                            <div key={`req-${i}`} className="glass-panel" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ fontSize: '0.9rem' }}>{req.username} wants to join squad</span>
+                                                <button onClick={() => acceptRequest(req.username)} style={{ background: 'var(--primary)', border: 'none', borderRadius: '8px', padding: '0.5rem', color: 'black', cursor: 'pointer' }}><Check size={18}/></button>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
 
-                            {/* Squad List */}
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginBottom: '1rem', letterSpacing: '2px' }}>ACTIVE SQUAD</p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                {friends.length > 0 ? (
-                                    friends.map((f, i) => {
-                                        const fName = f.username || f.friend?.username;
-                                        if (!fName) return null;
-                                        return (
-                                            <div key={i} className="glass-panel" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                    <div style={{ width: '8px', height: '8px', background: 'var(--success)', borderRadius: '50%', boxShadow: '0 0 10px var(--success)' }} />
-                                                    <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{fName}</span>
+                            {/* Section 3: Squad List */}
+                            <div>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginBottom: '1rem', letterSpacing: '2px' }}>ACTIVE SQUAD</p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                    {friends.length > 0 ? (
+                                        friends.map((f, i) => {
+                                            const fName = f.username || f.friend?.username;
+                                            if (!fName) return null;
+                                            return (
+                                                <div key={i} className="glass-panel" style={{ padding: '1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                        <div style={{ width: '10px', height: '10px', background: 'var(--success)', borderRadius: '50%', boxShadow: '0 0 10px var(--success)' }} />
+                                                        <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{fName}</span>
+                                                    </div>
+                                                    <button onClick={() => handleInvite(fName)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '0.5rem 1rem', borderRadius: '10px', fontSize: '0.7rem', fontWeight: '800', cursor: 'pointer' }}>CHALLENGE</button>
                                                 </div>
-                                                <button onClick={() => handleInvite(fName)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '0.3rem 0.8rem', borderRadius: '5px', fontSize: '0.7rem', cursor: 'pointer' }}>CHALLENGE</button>
-                                            </div>
-                                        );
-                                    })
-                                ) : (
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '2rem', border: '1px dashed var(--glass-border)', borderRadius: '15px' }}>
-                                        NO OPERATORS FOUND IN SQUAD
-                                    </p>
-                                )}
+                                            );
+                                        })
+                                    ) : (
+                                        <div style={{ textAlign: 'center', padding: '3rem 1rem', border: '1px dashed var(--glass-border)', borderRadius: '24px' }}>
+                                            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>SQUAD IS EMPTY</p>
+                                            <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.6rem', marginTop: '0.5rem' }}>ADD OPERATORS ABOVE TO START BATTLING</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </motion.div>
                     </>
