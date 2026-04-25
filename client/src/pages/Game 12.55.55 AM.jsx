@@ -18,6 +18,9 @@ const Game = () => {
     const [isXNext, setIsXNext] = useState(true);
     const [winner, setWinner] = useState(null);
     const [status, setStatus] = useState('');
+    const [activeEmoji, setActiveEmoji] = useState({ X: null, O: null });
+
+    const EMOJIS = ['😎', '😂', '🔥', '🤔', '💀', '🤡', '💪', '👋'];
     
     const room = searchParams.get('room');
     const players = searchParams.get('players')?.split(',');
@@ -92,10 +95,17 @@ const Game = () => {
                 setStatus('MISSION ABORTED: VICTORY BY FORFEIT');
             });
 
+            socket.on('receive_emoji', ({ emoji, sender }) => {
+                const role = (sender.toLowerCase() === players[0].toLowerCase()) ? 'X' : 'O';
+                setActiveEmoji(prev => ({ ...prev, [role]: emoji }));
+                setTimeout(() => setActiveEmoji(prev => ({ ...prev, [role]: null })), 3000);
+            });
+
             return () => {
                 socket.off('move_made');
                 socket.off('rematch_started');
                 socket.off('opponent_left');
+                socket.off('receive_emoji');
             };
         }
     }, [mode]);
@@ -143,6 +153,16 @@ const Game = () => {
             );
             updateStatsLocally(res.data);
         } catch (err) { console.error('Failed to update stats'); }
+    };
+
+    const sendEmoji = (emoji) => {
+        if (mode === 'online') {
+            socket.emit('send_emoji', { room, emoji, sender: user.username });
+        } else {
+            const role = isXNext ? 'X' : 'O';
+            setActiveEmoji(prev => ({ ...prev, [role]: emoji }));
+            setTimeout(() => setActiveEmoji(prev => ({ ...prev, [role]: null })), 3000);
+        }
     };
 
     const resetGame = (emit = true) => {
@@ -241,14 +261,61 @@ const Game = () => {
                 </div>
 
                 <div className="game-players" style={{ display: 'flex', justifyContent: 'center', gap: '5rem', marginBottom: '2.5rem' }}>
-                    <motion.div animate={{ opacity: (isXNext || winner === 'X') ? 1 : 0.2, scale: (isXNext && !winner) ? 1.2 : 1, z: (isXNext && !winner) ? 50 : 0 }}>
+                    <motion.div style={{ position: 'relative' }} animate={{ opacity: (isXNext || winner === 'X') ? 1 : 0.2, scale: (isXNext && !winner) ? 1.2 : 1, z: (isXNext && !winner) ? 50 : 0 }}>
+                        <AnimatePresence>
+                            {activeEmoji.X && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 20, scale: 0 }}
+                                    animate={{ opacity: 1, y: -40, scale: 1.5 }}
+                                    exit={{ opacity: 0, scale: 0 }}
+                                    style={{ position: 'absolute', top: '-20px', left: '50%', transform: 'translateX(-50%)', fontSize: '2rem', pointerEvents: 'none', zIndex: 100 }}
+                                >
+                                    {activeEmoji.X}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                         <div className="square x" style={{ width: '80px', height: '80px', margin: '0 auto 0.8rem', cursor: 'default', fontSize: '2.5rem', background: 'rgba(0, 242, 255, 0.05)', borderRadius: '20px' }}>X</div>
-                        <p style={{ fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px' }}>PILOT ALPHA</p>
+                        <p style={{ fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px' }}>{mode === 'online' ? players[0] : 'PILOT ALPHA'}</p>
                     </motion.div>
-                    <motion.div animate={{ opacity: (!isXNext || winner === 'O') ? 1 : 0.2, scale: (!isXNext && !winner) ? 1.2 : 1, z: (!isXNext && !winner) ? 50 : 0 }}>
+
+                    <motion.div style={{ position: 'relative' }} animate={{ opacity: (!isXNext || winner === 'O') ? 1 : 0.2, scale: (!isXNext && !winner) ? 1.2 : 1, z: (!isXNext && !winner) ? 50 : 0 }}>
+                        <AnimatePresence>
+                            {activeEmoji.O && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 20, scale: 0 }}
+                                    animate={{ opacity: 1, y: -40, scale: 1.5 }}
+                                    exit={{ opacity: 0, scale: 0 }}
+                                    style={{ position: 'absolute', top: '-20px', left: '50%', transform: 'translateX(-50%)', fontSize: '2rem', pointerEvents: 'none', zIndex: 100 }}
+                                >
+                                    {activeEmoji.O}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                         <div className="square o" style={{ width: '80px', height: '80px', margin: '0 auto 0.8rem', cursor: 'default', fontSize: '2.5rem', background: 'rgba(112, 0, 255, 0.05)', borderRadius: '20px' }}>O</div>
-                        <p style={{ fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px' }}>{mode === 'computer' ? 'NEURAL CORE' : 'PILOT BETA'}</p>
+                        <p style={{ fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px' }}>{mode === 'computer' ? 'NEURAL CORE' : (mode === 'online' ? players[1] : 'PILOT BETA')}</p>
                     </motion.div>
+                </div>
+
+                {/* Emoji Bar */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                    {EMOJIS.map(emoji => (
+                        <motion.button
+                            key={emoji}
+                            whileHover={{ scale: 1.2, rotate: 10 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => sendEmoji(emoji)}
+                            style={{ 
+                                background: 'rgba(255,255,255,0.05)', 
+                                border: '1px solid rgba(255,255,255,0.1)', 
+                                borderRadius: '12px', 
+                                padding: '0.5rem', 
+                                fontSize: '1.5rem', 
+                                cursor: 'pointer' 
+                            }}
+                        >
+                            {emoji}
+                        </motion.button>
+                    ))}
                 </div>
 
                 <div className="board">

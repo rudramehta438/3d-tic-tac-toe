@@ -123,6 +123,11 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('send_emoji', ({ room, emoji, sender }) => {
+        console.log(`💬 [CHAT] ${sender} sent ${emoji} in room ${room}`);
+        io.to(room).emit('receive_emoji', { emoji, sender });
+    });
+
     const handleForfeit = (socketId) => {
         const room = socketToRoom.get(socketId);
         console.log(`Handling Forfeit for ${socketId}. Room found: ${room}`);
