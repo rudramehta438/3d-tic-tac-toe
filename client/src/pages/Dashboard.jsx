@@ -23,14 +23,16 @@ const Dashboard = () => {
             fetchFriends();
             fetchRequests();
             socket.on('connect', () => {
+                console.log('Connected to socket server');
                 socket.emit('register_user', user.username);
             });
             
+            socket.connect();
+            
+            // If already connected, register immediately
             if (socket.connected) {
                 socket.emit('register_user', user.username);
             }
-            
-            socket.connect();
 
             socket.on('receive_invite', ({ from }) => {
                 setInvitations(prev => {

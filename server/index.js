@@ -16,7 +16,8 @@ const io = new Server(server, {
         origin: "*",
         methods: ["GET", "POST"],
         credentials: true
-    }
+    },
+    transports: ['websocket', 'polling']
 });
 
 app.use(cors({
@@ -42,15 +43,22 @@ io.on('connection', (socket) => {
         const normalizedUsername = username.toLowerCase();
         users.set(normalizedUsername, socket.id);
         socket.username = normalizedUsername;
-        console.log(`User Registered: ${normalizedUsername} -> ${socket.id}`);
+        console.log(`✅ [SOCKET] User Registered: ${normalizedUsername} (ID: ${socket.id})`);
+        console.log(`Current Online Users: ${Array.from(users.keys()).join(', ')}`);
     });
 
     socket.on('invite_friend', ({ invitedBy, friendName }) => {
         const normalizedFriendName = friendName.toLowerCase();
         const friendSocketId = users.get(normalizedFriendName);
+        
+        console.log(`📩 [INVITE] ${invitedBy} is challenging ${friendName}`);
+        
         if (friendSocketId) {
+            console.log(`   -> Target found! Sending to socket: ${friendSocketId}`);
             io.to(friendSocketId).emit('receive_invite', { from: invitedBy });
         } else {
+            console.log(`   -> ❌ Target ${normalizedFriendName} NOT ONLINE.`);
+            console.log(`      Available users were: ${Array.from(users.keys()).join(', ')}`);
             socket.emit('error_message', { message: 'Friend is not online' });
         }
     });
