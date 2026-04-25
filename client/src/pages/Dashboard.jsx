@@ -45,6 +45,7 @@ const Dashboard = () => {
                 axios.get(`${API_URL}/api/friends/requests`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
                 axios.get(`${API_URL}/api/auth/leaderboard`)
             ]);
+            console.log("Friends Data:", friendsRes.data);
             setFriends(friendsRes.data);
             setFriendRequests(requestsRes.data);
             setLeaderboard(leaderboardRes.data);
@@ -208,17 +209,27 @@ const Dashboard = () => {
                             )}
 
                             {/* Squad List */}
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginBottom: '1rem' }}>ACTIVE SQUAD</p>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginBottom: '1rem', letterSpacing: '2px' }}>ACTIVE SQUAD</p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                {friends.map((friend, i) => (
-                                    <div key={i} className="glass-panel" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                            <div style={{ width: '8px', height: '8px', background: 'var(--success)', borderRadius: '50%', boxShadow: '0 0 10px var(--success)' }} />
-                                            <span style={{ fontSize: '0.9rem' }}>{friend.username}</span>
-                                        </div>
-                                        <button onClick={() => handleInvite(friend.username)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '0.3rem 0.8rem', borderRadius: '5px', fontSize: '0.7rem' }}>CHALLENGE</button>
-                                    </div>
-                                ))}
+                                {friends.length > 0 ? (
+                                    friends.map((f, i) => {
+                                        const fName = f.username || f.friend?.username;
+                                        if (!fName) return null;
+                                        return (
+                                            <div key={i} className="glass-panel" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                    <div style={{ width: '8px', height: '8px', background: 'var(--success)', borderRadius: '50%', boxShadow: '0 0 10px var(--success)' }} />
+                                                    <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{fName}</span>
+                                                </div>
+                                                <button onClick={() => handleInvite(fName)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '0.3rem 0.8rem', borderRadius: '5px', fontSize: '0.7rem', cursor: 'pointer' }}>CHALLENGE</button>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center', padding: '2rem', border: '1px dashed var(--glass-border)', borderRadius: '15px' }}>
+                                        NO OPERATORS FOUND IN SQUAD
+                                    </p>
+                                )}
                             </div>
                         </motion.div>
                     </>
