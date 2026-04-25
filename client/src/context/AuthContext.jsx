@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -13,7 +15,7 @@ export const AuthProvider = ({ children }) => {
             const parsedUser = JSON.parse(storedUser);
             setUser(parsedUser);
             // Verify token/get fresh stats
-            axios.get('http://localhost:5001/api/auth/me', {
+            axios.get(`${API_URL}/api/auth/me`, {
                 headers: { Authorization: `Bearer ${parsedUser.token}` }
             }).then(res => {
                 setUser({ ...parsedUser, stats: res.data.stats, friends: res.data.friends });
@@ -26,14 +28,14 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (username, password) => {
-        const res = await axios.post('http://localhost:5001/api/auth/login', { username, password });
+        const res = await axios.post(`${API_URL}/api/auth/login`, { username, password });
         setUser(res.data);
         localStorage.setItem('user', JSON.stringify(res.data));
         return res.data;
     };
 
     const register = async (username, password) => {
-        const res = await axios.post('http://localhost:5001/api/auth/register', { username, password });
+        const res = await axios.post(`${API_URL}/api/auth/register`, { username, password });
         setUser(res.data);
         localStorage.setItem('user', JSON.stringify(res.data));
         return res.data;

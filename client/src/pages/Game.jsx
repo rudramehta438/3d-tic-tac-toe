@@ -6,6 +6,7 @@ import axios from 'axios';
 import { ArrowLeft, RotateCcw, User, Cpu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 const Game = () => {
     const { mode } = useParams();
@@ -131,7 +132,7 @@ const Game = () => {
             return;
         }
         try {
-            const res = await axios.put('http://localhost:5001/api/auth/stats', 
+            const res = await axios.put(`${API_URL}/api/auth/stats`, 
                 { wins: result === 'win' ? 1 : 0, losses: result === 'loss' ? 1 : 0, draws: result === 'draw' ? 1 : 0 },
                 { headers: { Authorization: `Bearer ${user.token}` }}
             );

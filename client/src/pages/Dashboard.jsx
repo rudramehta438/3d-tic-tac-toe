@@ -5,6 +5,7 @@ import axios from 'axios';
 import socket from '../services/socket';
 import { Users, Monitor, Globe, LogOut, Plus, Trophy, History, Mail, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
@@ -63,7 +64,7 @@ const Dashboard = () => {
 
     const fetchFriends = async () => {
         try {
-            const res = await axios.get('http://localhost:5001/api/friends', {
+            const res = await axios.get(`${API_URL}/api/friends`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setFriends(res.data);
@@ -74,7 +75,7 @@ const Dashboard = () => {
 
     const fetchRequests = async () => {
         try {
-            const res = await axios.get('http://localhost:5001/api/friends/requests', {
+            const res = await axios.get(`${API_URL}/api/friends/requests`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setFriendRequests(res.data);
@@ -87,7 +88,7 @@ const Dashboard = () => {
         e.preventDefault();
         setError('');
         try {
-            const res = await axios.post('http://localhost:5001/api/friends/add', 
+            const res = await axios.post(`${API_URL}/api/friends/add`, 
                 { friendUsername }, 
                 { headers: { Authorization: `Bearer ${user.token}` }}
             );
@@ -115,7 +116,7 @@ const Dashboard = () => {
 
     const acceptFriendRequest = async (fromUsername) => {
         try {
-            await axios.post('http://localhost:5001/api/friends/accept-request', 
+            await axios.post(`${API_URL}/api/friends/accept-request`, 
                 { fromUsername }, 
                 { headers: { Authorization: `Bearer ${user.token}` }}
             );
@@ -128,7 +129,7 @@ const Dashboard = () => {
 
     const declineFriendRequest = async (fromUsername) => {
         try {
-            await axios.post('http://localhost:5001/api/friends/decline-request', 
+            await axios.post(`${API_URL}/api/friends/decline-request`, 
                 { fromUsername }, 
                 { headers: { Authorization: `Bearer ${user.token}` }}
             );
