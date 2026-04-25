@@ -192,15 +192,15 @@ const Dashboard = () => {
                 <div className="glass-card" style={{ marginBottom: '2.5rem', padding: '3rem' }}>
                     <div className="dashboard-header">
                         <div>
-                            <h2 style={{ fontSize: 'clamp(1.8rem, 6vw, 3rem)', color: 'var(--primary)', textShadow: '0 0 20px var(--primary)' }}>PLAYER: {user?.username}</h2>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', letterSpacing: '2px', marginTop: '0.5rem' }}>COMMAND CENTER ONLINE</p>
+                            <h1 style={{ fontSize: 'clamp(1.5rem, 8vw, 3rem)', color: 'var(--primary)', textShadow: '0 0 20px var(--primary)' }}>PLAYER: {user?.username}</h1>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', letterSpacing: '2px', marginTop: '0.5rem', fontWeight: '900' }}>COMMAND CENTER ONLINE</p>
                         </div>
                         <motion.button 
-                            whileHover={{ scale: 1.05, x: 5, translateZ: 20 }}
+                            whileHover={{ scale: 1.05, translateZ: 20 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={logout} 
                             className="btn btn-outline" 
-                            style={{ border: 'none', background: 'rgba(255, 0, 85, 0.1)', color: 'var(--accent)', fontWeight: '800' }}
+                            style={{ width: 'auto', background: 'rgba(255, 0, 85, 0.1)', color: 'var(--accent)', fontWeight: '800', border: '1px solid rgba(255,0,85,0.2)' }}
                         >
                             <LogOut size={18} /> ABORT SESSION
                         </motion.button>
@@ -216,12 +216,12 @@ const Dashboard = () => {
                                 key={idx}
                                 variants={itemVariants}
                                 whileHover={{ y: -10, translateZ: 30, scale: 1.02 }}
-                                className="glass-card" 
-                                style={{ padding: '2rem', textAlign: 'center', background: stat.bg, borderColor: 'rgba(255,255,255,0.05)' }}
+                                className="glass-card stat-card" 
+                                style={{ padding: '1.5rem', textAlign: 'center', background: stat.bg, borderColor: 'rgba(255,255,255,0.05)' }}
                             >
-                                <stat.icon color={stat.color} size={32} style={{ marginBottom: '1rem', filter: `drop-shadow(0 0 10px ${stat.color})` }} />
-                                <h3 style={{ fontSize: '3rem', color: stat.color, textShadow: `0 0 20px ${stat.color}` }}>{stat.value}</h3>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '900', letterSpacing: '2px' }}>{stat.label}</p>
+                                <stat.icon color={stat.color} size={28} style={{ marginBottom: '1rem', filter: `drop-shadow(0 0 10px ${stat.color})` }} />
+                                <h3 style={{ fontSize: '2.2rem', color: stat.color, textShadow: `0 0 20px ${stat.color}` }}>{stat.value}</h3>
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '900', letterSpacing: '2px' }}>{stat.label}</p>
                             </motion.div>
                         ))}
                     </div>
@@ -264,12 +264,14 @@ const Dashboard = () => {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: index * 0.1 }}
+                                    className="leaderboard-row"
                                     style={{ 
                                         display: 'flex', 
                                         justifyContent: 'space-between', 
                                         padding: '1.2rem 2rem',
                                         borderBottom: index !== leaderboard.length - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none',
-                                        background: player.username === user.username ? 'rgba(0, 242, 255, 0.05)' : 'transparent'
+                                        background: player.username === user.username ? 'rgba(0, 242, 255, 0.05)' : 'transparent',
+                                        alignItems: 'center'
                                     }}
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>

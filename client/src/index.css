@@ -206,9 +206,16 @@ h1, h2, h3 {
 }
 
 @media (max-width: 768px) {
+  #root {
+    padding: 1rem;
+  }
+  .glass-card {
+    padding: 1.5rem;
+  }
   .board {
     transform: rotateX(15deg);
     gap: 12px;
+    margin: 1.5rem auto;
   }
   .square {
     border-radius: 12px;
@@ -216,6 +223,25 @@ h1, h2, h3 {
   .social-drawer {
     width: 100%;
     border-left: none;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  .dashboard-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .btn {
+    width: 100%;
+    padding: 1rem !important;
+    font-size: 0.9rem !important;
+  }
+  .leaderboard-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.8rem;
   }
 }
 
