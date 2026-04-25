@@ -22,8 +22,13 @@ const Dashboard = () => {
     useEffect(() => {
         if (user && !user.isGuest) {
             fetchData();
-            socket.connect();
+            
+            if (!socket.connected) {
+                socket.connect();
+            }
+            
             socket.emit('register_user', user.username);
+            console.log("Registered Socket for:", user.username);
 
             socket.on('receive_invite', ({ from }) => {
                 setInvitations(prev => [...new Set([...prev, from])]);
@@ -32,16 +37,23 @@ const Dashboard = () => {
             socket.on('receive_friend_request', fetchData);
 
             socket.on('game_start', ({ room, players, turn }) => {
+                console.log("GAME START SIGNAL RECEIVED!", room);
                 navigate(`/game/online?room=${room}&players=${players.join(',')}&turn=${turn}`);
             });
 
+            // Heartbeat to keep connection alive
+            const interval = setInterval(() => {
+                if (!socket.connected) socket.connect();
+            }, 5000);
+
             return () => {
+                clearInterval(interval);
                 socket.off('receive_invite');
                 socket.off('receive_friend_request');
                 socket.off('game_start');
             };
         }
-    }, [user]);
+    }, [user, navigate]);
 
     const fetchData = async () => {
         try {
