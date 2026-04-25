@@ -59,6 +59,8 @@ const Dashboard = () => {
         try {
             const storedUser = JSON.parse(localStorage.getItem('user'));
             const token = storedUser?.token;
+            if (!token) return; // Stop if no token
+
             const config = { headers: { Authorization: `Bearer ${token}` } };
             
             const [friendsRes, requestsRes, leaderboardRes] = await Promise.all([
@@ -77,6 +79,11 @@ const Dashboard = () => {
         try {
             const storedUser = JSON.parse(localStorage.getItem('user'));
             const token = storedUser?.token;
+            if (!token) {
+                setError('PLEASE LOG IN AGAIN');
+                return;
+            }
+
             await axios.post(`${API_URL}/api/friends/add`, { friendUsername: friendName }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
