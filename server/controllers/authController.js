@@ -81,7 +81,7 @@ exports.getLeaderboard = async (req, res) => {
     try {
         const topPlayers = await User.find()
             .sort({ 'stats.wins': -1 })
-            .limit(10)
+            .limit(3)
             .select('username stats');
         res.json(topPlayers);
     } catch (error) {

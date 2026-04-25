@@ -250,7 +250,7 @@ const Dashboard = () => {
                     {/* Global Leaderboard Section */}
                     <div style={{ marginTop: '4rem' }}>
                         <h2 style={{ color: 'var(--primary)', letterSpacing: '4px', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <Trophy size={24} /> GLOBAL RANKINGS
+                            <Trophy size={24} /> TOP CHAMPIONS
                         </h2>
                         <div style={{ 
                             background: 'rgba(255,255,255,0.02)', 
