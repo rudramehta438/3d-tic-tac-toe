@@ -23,7 +23,9 @@ const Game = () => {
     const EMOJIS = ['😎', '😂', '🔥', '🤔', '💀', '🤡', '💪', '👋'];
     const room = searchParams.get('room');
     const players = searchParams.get('players')?.split(',');
-    const mySymbol = players && players[0] === user?.username ? 'X' : 'O';
+    
+    // Identity Check: Make sure we know which player we are!
+    const mySymbol = (players && user && players[0].toLowerCase() === user.username.toLowerCase()) ? 'X' : 'O';
 
     const sounds = {
         move: new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'),
@@ -69,12 +71,17 @@ const Game = () => {
     }, [board, isXNext]);
 
     useEffect(() => {
-        if (mode === 'online') {
-            socket.connect();
-            if (user) socket.emit('register_user', user.username);
-            if (room) socket.emit('join_room', room);
+        if (mode === 'online' && room) {
+            if (!socket.connected) socket.connect();
+            
+            socket.emit('register_user', user?.username || 'unknown');
+            socket.emit('join_room', room);
 
-            socket.on('move_made', ({ board: b, nextTurn }) => { setBoard(b); setIsXNext(nextTurn === 'X'); });
+            socket.on('move_made', ({ board, nextTurn }) => {
+                setBoard(board);
+                setIsXNext(nextTurn === 'X');
+                playSound('move');
+            });
             socket.on('rematch_started', ({ board: b, nextTurn }) => {
                 setBoard(b); setIsXNext(nextTurn === 'X'); setWinner(null);
             });
@@ -90,7 +97,7 @@ const Game = () => {
                 socket.off('receive_emoji'); socket.off('opponent_left');
             };
         }
-    }, [mode]);
+    }, [mode, room, user, players]);
 
     useEffect(() => {
         if (mode === 'computer' && !isXNext && !winner) {
@@ -104,10 +111,17 @@ const Game = () => {
 
     const makeMove = (i) => {
         if (board[i] || winner) return;
-        if (mode === 'online' && (isXNext ? 'X' : 'O') !== mySymbol) return;
+        
+        // Only allow move if it's your turn!
+        const currentTurn = isXNext ? 'X' : 'O';
+        if (mode === 'online' && currentTurn !== mySymbol) {
+            console.log("NOT YOUR TURN! You are:", mySymbol, "Wait for:", currentTurn);
+            return;
+        }
 
-        const newBoard = board.slice();
-        newBoard[i] = isXNext ? 'X' : 'O';
+        const newBoard = [...board];
+        const symbol = currentTurn;
+        newBoard[i] = symbol;
         setBoard(newBoard);
         setIsXNext(!isXNext);
         playSound('move');
