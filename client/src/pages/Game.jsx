@@ -80,7 +80,12 @@ const Game = () => {
                 setBoard(newBoard);
                 setIsXNext(nextTurn === 'X');
             });
-            socket.on('game_restart', () => resetGame(false));
+            socket.on('rematch_started', ({ board: newBoard, nextTurn }) => {
+                setBoard(newBoard);
+                setIsXNext(nextTurn === 'X');
+                setWinner(null);
+                setStatus(`${nextTurn}'S TURN`);
+            });
             
             socket.on('opponent_left', () => {
                 setWinner('Forfeit');
@@ -89,7 +94,7 @@ const Game = () => {
 
             return () => {
                 socket.off('move_made');
-                socket.off('game_restart');
+                socket.off('rematch_started');
                 socket.off('opponent_left');
             };
         }
@@ -141,10 +146,13 @@ const Game = () => {
     };
 
     const resetGame = (emit = true) => {
-        setBoard(Array(9).fill(null));
-        setIsXNext(true);
-        setWinner(null);
-        if (mode === 'online' && emit) socket.emit('restart_request', { room });
+        if (mode === 'online' && emit) {
+            socket.emit('request_rematch', { room });
+        } else {
+            setBoard(Array(9).fill(null));
+            setIsXNext(true);
+            setWinner(null);
+        }
     };
 
     const getBestMove = (currentBoard) => {

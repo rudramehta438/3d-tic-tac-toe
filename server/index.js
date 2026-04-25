@@ -107,6 +107,22 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('request_rematch', ({ room }) => {
+        const game = games.get(room);
+        if (game) {
+            console.log(`🔄 [REMATCH] Resetting game in room: ${room}`);
+            // Reset game state
+            game.board = Array(9).fill(null);
+            game.nextTurn = 'X'; // You could also randomize this or swap from last game
+            
+            // Tell both players to reset
+            io.to(room).emit('rematch_started', { 
+                board: game.board, 
+                nextTurn: game.nextTurn 
+            });
+        }
+    });
+
     const handleForfeit = (socketId) => {
         const room = socketToRoom.get(socketId);
         console.log(`Handling Forfeit for ${socketId}. Room found: ${room}`);
