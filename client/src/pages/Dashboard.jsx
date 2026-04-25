@@ -55,7 +55,7 @@ const Dashboard = () => {
     const sendFriendRequest = async () => {
         if (!friendName) return;
         try {
-            await axios.post(`${API_URL}/api/friends/request`, { friendUsername: friendName }, {
+            await axios.post(`${API_URL}/api/friends/add`, { friendUsername: friendName }, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
             setFriendName('');
@@ -67,7 +67,7 @@ const Dashboard = () => {
 
     const acceptRequest = async (username) => {
         try {
-            await axios.post(`${API_URL}/api/friends/accept`, { friendUsername: username }, {
+            await axios.post(`${API_URL}/api/friends/accept-request`, { fromUsername: username }, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
             fetchData();
