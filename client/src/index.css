@@ -132,29 +132,28 @@ h1, h2, h3 {
 
 /* 3D Game Board */
 .game-board-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  max-width: 450px;
-  width: 100%;
-  margin: 2rem auto;
-  transform: rotateX(15deg) rotateY(0deg);
-  transform-style: preserve-3d;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 15px !important;
+  width: 100% !important;
+  max-width: 450px !important;
+  margin: 2rem auto !important;
+  transform: rotateX(15deg) !important;
+  transform-style: preserve-3d !important;
 }
 
 .game-square {
-  aspect-ratio: 1/1;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(2rem, 10vw, 4rem);
-  font-family: 'Syncopate', sans-serif;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  transform-style: preserve-3d;
+  aspect-ratio: 1/1 !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: clamp(2rem, 10vw, 4rem) !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  transform-style: preserve-3d !important;
 }
 
 .game-square:hover:not(.occupied) {

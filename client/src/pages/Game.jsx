@@ -92,6 +92,16 @@ const Game = () => {
         }
     }, [mode]);
 
+    useEffect(() => {
+        if (mode === 'computer' && !isXNext && !winner) {
+            const timeout = setTimeout(() => {
+                const bestMove = getBestMove(board);
+                makeMove(bestMove);
+            }, 600);
+            return () => clearTimeout(timeout);
+        }
+    }, [isXNext, winner, mode]);
+
     const makeMove = (i) => {
         if (board[i] || winner) return;
         if (mode === 'online' && (isXNext ? 'X' : 'O') !== mySymbol) return;
@@ -113,6 +123,58 @@ const Game = () => {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
         } catch (err) { console.error('Stats sync failed'); }
+    };
+
+    const getBestMove = (currentBoard) => {
+        const minimax = (tempBoard, depth, isMaximizing) => {
+            const check = (sq) => {
+                const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+                for (let l of lines) if (sq[l[0]] && sq[l[0]] === sq[l[1]] && sq[l[0]] === sq[l[2]]) return sq[l[0]];
+                return sq.includes(null) ? null : 'Draw';
+            };
+            const res = check(tempBoard);
+            if (res === 'O') return 10 - depth;
+            if (res === 'X') return depth - 10;
+            if (res === 'Draw') return 0;
+
+            if (isMaximizing) {
+                let best = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (!tempBoard[i]) {
+                        tempBoard[i] = 'O';
+                        best = Math.max(best, minimax(tempBoard, depth + 1, false));
+                        tempBoard[i] = null;
+                    }
+                }
+                return best;
+            } else {
+                let best = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (!tempBoard[i]) {
+                        tempBoard[i] = 'X';
+                        best = Math.min(best, minimax(tempBoard, depth + 1, true));
+                        tempBoard[i] = null;
+                    }
+                }
+                return best;
+            }
+        };
+
+        let bestVal = -Infinity;
+        let move = -1;
+        const temp = [...currentBoard];
+        for (let i = 0; i < 9; i++) {
+            if (!temp[i]) {
+                temp[i] = 'O';
+                let moveVal = minimax(temp, 0, false);
+                temp[i] = null;
+                if (moveVal > bestVal) {
+                    bestVal = moveVal;
+                    move = i;
+                }
+            }
+        }
+        return move;
     };
 
     const resetGame = (emit = true) => {
@@ -137,14 +199,14 @@ const Game = () => {
                 <motion.button whileHover={{ rotate: 180 }} onClick={() => resetGame()} className="btn btn-outline" style={{ padding: '0.8rem' }}><RotateCcw size={18} /></motion.button>
             </div>
 
-            <div style={{ display: 'flex', gap: '4rem', alignItems: 'center' }} className="battle-layout">
-                <div style={{ textAlign: 'center', position: 'relative' }}>
-                    <AnimatePresence>{activeEmoji.X && <motion.div initial={{ scale: 0, y: 0 }} animate={{ scale: 2, y: -50 }} exit={{ scale: 0 }} style={{ position: 'absolute', width: '100%', top: 0 }}>{activeEmoji.X}</motion.div>}</AnimatePresence>
-                    <div className={`game-square ${isXNext ? 'x' : ''}`} style={{ width: '100px', height: '100px', opacity: isXNext ? 1 : 0.2 }}>X</div>
-                    <p style={{ marginTop: '1rem', fontWeight: '700', color: isXNext ? 'var(--primary)' : 'var(--text-muted)' }}>{mode === 'online' ? players?.[0] : 'ALPHA'}</p>
+            <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', justifyContent: 'center', width: '100%', flexWrap: 'wrap' }} className="battle-layout">
+                <div style={{ textAlign: 'center', position: 'relative', minWidth: '120px' }}>
+                    <AnimatePresence>{activeEmoji.X && <motion.div initial={{ scale: 0, y: 0 }} animate={{ scale: 2, y: -50 }} exit={{ scale: 0 }} style={{ position: 'absolute', width: '100%', top: 0, zIndex: 100 }}>{activeEmoji.X}</motion.div>}</AnimatePresence>
+                    <div className={`game-square ${isXNext ? 'x' : ''}`} style={{ width: '80px', height: '80px', margin: '0 auto', opacity: isXNext ? 1 : 0.2 }}>X</div>
+                    <p style={{ marginTop: '1rem', fontWeight: '900', letterSpacing: '2px', fontSize: '0.7rem', color: isXNext ? 'var(--primary)' : 'var(--text-muted)' }}>{mode === 'online' ? players?.[0] : 'ALPHA'}</p>
                 </div>
 
-                <div className="game-board-container">
+                <div className="game-board-container" style={{ flex: '1', maxWidth: '450px' }}>
                     {board.map((sq, i) => (
                         <motion.div key={i} whileTap={{ scale: 0.9 }} className={`game-square ${sq?.toLowerCase() || ''} ${sq ? 'occupied' : ''}`} onClick={() => makeMove(i)}>
                             {sq}
@@ -152,10 +214,10 @@ const Game = () => {
                     ))}
                 </div>
 
-                <div style={{ textAlign: 'center', position: 'relative' }}>
-                    <AnimatePresence>{activeEmoji.O && <motion.div initial={{ scale: 0, y: 0 }} animate={{ scale: 2, y: -50 }} exit={{ scale: 0 }} style={{ position: 'absolute', width: '100%', top: 0 }}>{activeEmoji.O}</motion.div>}</AnimatePresence>
-                    <div className={`game-square ${!isXNext ? 'o' : ''}`} style={{ width: '100px', height: '100px', opacity: !isXNext ? 1 : 0.2 }}>O</div>
-                    <p style={{ marginTop: '1rem', fontWeight: '700', color: !isXNext ? 'var(--secondary)' : 'var(--text-muted)' }}>{mode === 'online' ? players?.[1] : 'BETA'}</p>
+                <div style={{ textAlign: 'center', position: 'relative', minWidth: '120px' }}>
+                    <AnimatePresence>{activeEmoji.O && <motion.div initial={{ scale: 0, y: 0 }} animate={{ scale: 2, y: -50 }} exit={{ scale: 0 }} style={{ position: 'absolute', width: '100%', top: 0, zIndex: 100 }}>{activeEmoji.O}</motion.div>}</AnimatePresence>
+                    <div className={`game-square ${!isXNext ? 'o' : ''}`} style={{ width: '80px', height: '80px', margin: '0 auto', opacity: !isXNext ? 1 : 0.2 }}>O</div>
+                    <p style={{ marginTop: '1rem', fontWeight: '900', letterSpacing: '2px', fontSize: '0.7rem', color: !isXNext ? 'var(--secondary)' : 'var(--text-muted)' }}>{mode === 'computer' ? 'NEURAL' : (mode === 'online' ? players?.[1] : 'BETA')}</p>
                 </div>
             </div>
 
