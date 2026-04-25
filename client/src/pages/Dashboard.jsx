@@ -31,9 +31,14 @@ const Dashboard = () => {
 
             socket.on('receive_friend_request', fetchData);
 
+            socket.on('game_start', ({ room, players, turn }) => {
+                navigate(`/game/online?room=${room}&players=${players.join(',')}&turn=${turn}`);
+            });
+
             return () => {
                 socket.off('receive_invite');
                 socket.off('receive_friend_request');
+                socket.off('game_start');
             };
         }
     }, [user]);
