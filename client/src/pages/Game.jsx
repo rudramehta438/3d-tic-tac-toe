@@ -26,6 +26,22 @@ const Game = () => {
     const players = searchParams.get('players')?.split(',');
     const mySymbol = players && players[0] === user?.username ? 'X' : 'O';
 
+    // Sound Effects
+    const sounds = {
+        move: new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'),
+        win: new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'),
+        loss: new Audio('https://assets.mixkit.co/active_storage/sfx/253/253-preview.mp3'),
+        emoji: new Audio('https://assets.mixkit.co/active_storage/sfx/2016/2016-preview.mp3')
+    };
+
+    const playSound = (name) => {
+        const s = sounds[name];
+        if (s) {
+            s.currentTime = 0;
+            s.play().catch(() => {}); // Catch browser blocking
+        }
+    };
+
     useEffect(() => {
         const calculateWinner = (squares) => {
             const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
@@ -57,12 +73,15 @@ const Game = () => {
                 setStatus(`${win} VICTORIOUS!`);
                 const iWon = (mode === 'online') ? (win === mySymbol) : (win === 'X');
                 if (iWon) {
+                    playSound('win');
                     confetti({
                         particleCount: 150,
                         spread: 70,
                         origin: { y: 0.6 },
                         colors: [win === 'X' ? '#06b6d4' : '#d946ef', '#ffffff']
                     });
+                } else {
+                    playSound('loss');
                 }
                 if (mode !== 'local') recordResult(iWon ? 'win' : 'loss');
             }
@@ -128,6 +147,7 @@ const Game = () => {
         newBoard[i] = isXNext ? 'X' : 'O';
         setBoard(newBoard);
         setIsXNext(!isXNext);
+        playSound('move');
 
         if (mode === 'online') {
             socket.emit('make_move', { room, board: newBoard, nextTurn: !isXNext ? 'X' : 'O' });
@@ -156,6 +176,7 @@ const Game = () => {
     };
 
     const sendEmoji = (emoji) => {
+        playSound('emoji');
         if (mode === 'online') {
             socket.emit('send_emoji', { room, emoji, sender: user.username });
         } else {
