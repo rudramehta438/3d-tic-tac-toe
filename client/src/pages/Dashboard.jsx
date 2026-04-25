@@ -92,6 +92,10 @@ const Dashboard = () => {
         setTimeout(() => setError(''), 3000);
     };
 
+    const acceptInvite = (inviter) => {
+        socket.emit('accept_invite', { acceptedBy: user.username, invitedBy: inviter });
+    };
+
     return (
         <div style={{ minHeight: '100vh', padding: '2rem' }}>
             <div className="nebula-bg" />
@@ -237,7 +241,7 @@ const Dashboard = () => {
                                         {invitations.map((inviter, i) => (
                                             <div key={`inv-${i}`} className="glass-panel" style={{ padding: '1rem', border: '1px solid var(--success)', background: 'rgba(0,255,170,0.05)' }}>
                                                 <p style={{ fontSize: '0.8rem', marginBottom: '0.8rem' }}>GAME CHALLENGE: <b>{inviter}</b></p>
-                                                <button onClick={() => navigate(`/game/online?room=room_${inviter}_${user.username}&players=${inviter},${user.username}&turn=X`)} style={{ width: '100%', background: 'var(--success)', border: 'none', borderRadius: '8px', padding: '0.6rem', color: 'black', fontWeight: '800', cursor: 'pointer' }}>ACCEPT & PLAY</button>
+                                                <button onClick={() => acceptInvite(inviter)} style={{ width: '100%', background: 'var(--success)', border: 'none', borderRadius: '8px', padding: '0.6rem', color: 'black', fontWeight: '800', cursor: 'pointer' }}>ACCEPT & PLAY</button>
                                             </div>
                                         ))}
                                         {friendRequests.map((req, i) => (
