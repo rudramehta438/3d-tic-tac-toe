@@ -120,8 +120,8 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = 5001;
-const MONGO_URI = 'mongodb://localhost:27017/tictactoe';
+const PORT = process.env.PORT || 5001;
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tictactoe';
 
 mongoose.connect(MONGO_URI)
     .then(() => {
