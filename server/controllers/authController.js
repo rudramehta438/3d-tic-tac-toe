@@ -77,3 +77,15 @@ exports.updateStats = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+exports.getLeaderboard = async (req, res) => {
+    try {
+        const topPlayers = await User.find()
+            .sort({ 'stats.wins': -1 })
+            .limit(10)
+            .select('username stats');
+        res.json(topPlayers);
+    } catch (error) {
+        console.error('Leaderboard Error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

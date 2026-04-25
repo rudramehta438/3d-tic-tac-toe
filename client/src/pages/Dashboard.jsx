@@ -17,6 +17,7 @@ const Dashboard = () => {
     const [friendRequests, setFriendRequests] = useState([]); // Friend requests (API)
     const [successMessage, setSuccessMessage] = useState('');
     const [isSocialOpen, setIsSocialOpen] = useState(false);
+    const [leaderboard, setLeaderboard] = useState([]);
 
     useEffect(() => {
         if (user && !user.isGuest) {
@@ -45,6 +46,8 @@ const Dashboard = () => {
             socket.on('receive_friend_request', () => {
                 fetchRequests();
             });
+
+            fetchLeaderboard();
 
             socket.on('connect_error', (err) => {
                 console.error('Socket connection error:', err);
@@ -77,6 +80,15 @@ const Dashboard = () => {
             setFriends(res.data);
         } catch (err) {
             console.error('Failed to fetch friends');
+        }
+    };
+
+    const fetchLeaderboard = async () => {
+        try {
+            const res = await axios.get(`${API_URL}/api/auth/leaderboard`);
+            setLeaderboard(res.data);
+        } catch (err) {
+            console.error('Failed to fetch leaderboard');
         }
     };
 
@@ -233,6 +245,53 @@ const Dashboard = () => {
                         >
                             <Monitor size={32} /> PVE: NEURAL CORE
                         </motion.button>
+                    </div>
+
+                    {/* Global Leaderboard Section */}
+                    <div style={{ marginTop: '4rem' }}>
+                        <h2 style={{ color: 'var(--primary)', letterSpacing: '4px', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <Trophy size={24} /> GLOBAL RANKINGS
+                        </h2>
+                        <div style={{ 
+                            background: 'rgba(255,255,255,0.02)', 
+                            borderRadius: '24px', 
+                            border: '1px solid rgba(255,255,255,0.05)',
+                            overflow: 'hidden'
+                        }}>
+                            {leaderboard.map((player, index) => (
+                                <motion.div 
+                                    key={player._id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    style={{ 
+                                        display: 'flex', 
+                                        justifyContent: 'space-between', 
+                                        padding: '1.2rem 2rem',
+                                        borderBottom: index !== leaderboard.length - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none',
+                                        background: player.username === user.username ? 'rgba(0, 242, 255, 0.05)' : 'transparent'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                                        <span style={{ 
+                                            color: index < 3 ? 'var(--primary)' : 'var(--text-muted)', 
+                                            fontWeight: '900', 
+                                            fontSize: '1.2rem',
+                                            width: '30px'
+                                        }}>
+                                            #{index + 1}
+                                        </span>
+                                        <span style={{ fontWeight: '600', color: player.username === user.username ? 'var(--primary)' : 'white' }}>
+                                            {player.username}
+                                        </span>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '2rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                        <span>WINS: <strong style={{ color: 'var(--primary)' }}>{player.stats.wins}</strong></span>
+                                        <span>TOTAL: <strong>{player.stats.totalGames}</strong></span>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </motion.div>

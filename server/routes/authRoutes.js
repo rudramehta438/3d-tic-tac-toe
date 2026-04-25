@@ -7,5 +7,6 @@ router.post('/register', register);
 router.post('/login', login);
 router.get('/me', protect, getMe);
 router.put('/stats', protect, updateStats);
+router.get('/leaderboard', getLeaderboard);
 
 module.exports = router;
