@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.PIterator ? express.Router() : express.Router(); // Handle environment issues if any
-const { register, login, getMe, updateStats } = require('../controllers/authController');
+const { register, login, getMe, updateStats, getLeaderboard } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
 router.post('/register', register);
