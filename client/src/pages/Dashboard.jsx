@@ -40,7 +40,10 @@ const Dashboard = () => {
 
     const fetchData = async () => {
         try {
-            const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+            const storedUser = JSON.parse(localStorage.getItem('user'));
+            const token = storedUser?.token;
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            
             const [friendsRes, requestsRes, leaderboardRes] = await Promise.all([
                 axios.get(`${API_URL}/api/friends`, config),
                 axios.get(`${API_URL}/api/friends/requests`, config),
@@ -55,8 +58,10 @@ const Dashboard = () => {
     const sendFriendRequest = async () => {
         if (!friendName) return;
         try {
+            const storedUser = JSON.parse(localStorage.getItem('user'));
+            const token = storedUser?.token;
             await axios.post(`${API_URL}/api/friends/add`, { friendUsername: friendName }, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
             setFriendName('');
             setError('REQUEST SENT!');
@@ -67,8 +72,10 @@ const Dashboard = () => {
 
     const acceptRequest = async (username) => {
         try {
+            const storedUser = JSON.parse(localStorage.getItem('user'));
+            const token = storedUser?.token;
             await axios.post(`${API_URL}/api/friends/accept-request`, { fromUsername: username }, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
             fetchData();
         } catch (err) { console.error('Accept failed'); }
