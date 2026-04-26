@@ -208,7 +208,7 @@ const Game = () => {
             <div className="nebula-bg" />
             <div className="grid-overlay" />
 
-            <div style={{ width: '100%', maxWidth: '1000px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div style={{ width: '100%', maxWidth: '1000px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', padding: '0 1rem' }}>
                 <motion.button whileHover={{ x: -5 }} onClick={() => navigate('/')} className="btn btn-outline" style={{ padding: '0.8rem' }}><ArrowLeft size={18} /></motion.button>
                 <div style={{ textAlign: 'center' }}>
                     <h2 className="gradient-text" style={{ fontSize: '1rem', letterSpacing: '5px' }}>{mode.toUpperCase()} ARENA</h2>
@@ -217,14 +217,14 @@ const Game = () => {
                 <motion.button whileHover={{ rotate: 180 }} onClick={() => resetGame()} className="btn btn-outline" style={{ padding: '0.8rem' }}><RotateCcw size={18} /></motion.button>
             </div>
 
-            <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', justifyContent: 'center', width: '100%', flexWrap: 'wrap' }} className="battle-layout">
-                <div style={{ textAlign: 'center', position: 'relative', minWidth: '120px' }}>
+            <div className="battle-layout" style={{ width: '100%' }}>
+                <div style={{ textAlign: 'center', position: 'relative' }}>
                     <AnimatePresence>{activeEmoji.X && <motion.div initial={{ scale: 0, y: 0 }} animate={{ scale: 2, y: -50 }} exit={{ scale: 0 }} style={{ position: 'absolute', width: '100%', top: 0, zIndex: 100 }}>{activeEmoji.X}</motion.div>}</AnimatePresence>
-                    <div className={`game-square ${isXNext ? 'x' : ''}`} style={{ width: '80px', height: '80px', margin: '0 auto', opacity: isXNext ? 1 : 0.2 }}>X</div>
-                    <p style={{ marginTop: '1rem', fontWeight: '900', letterSpacing: '2px', fontSize: '0.7rem', color: isXNext ? 'var(--primary)' : 'var(--text-muted)' }}>{mode === 'online' ? players?.[0] : 'ALPHA'}</p>
+                    <div className={`game-square ${isXNext ? 'x' : ''}`} style={{ width: '70px', height: '70px', margin: '0 auto', opacity: isXNext ? 1 : 0.2 }}>X</div>
+                    <p style={{ marginTop: '0.5rem', fontWeight: '900', letterSpacing: '2px', fontSize: '0.6rem', color: isXNext ? 'var(--primary)' : 'var(--text-muted)' }}>{mode === 'online' ? players?.[0] : 'ALPHA'}</p>
                 </div>
 
-                <div className="game-board-container" style={{ flex: '1', maxWidth: '450px' }}>
+                <div className="game-board-container">
                     {board.map((sq, i) => (
                         <motion.div key={i} whileTap={{ scale: 0.9 }} className={`game-square ${sq?.toLowerCase() || ''} ${sq ? 'occupied' : ''}`} onClick={() => makeMove(i)}>
                             {sq}
@@ -232,10 +232,10 @@ const Game = () => {
                     ))}
                 </div>
 
-                <div style={{ textAlign: 'center', position: 'relative', minWidth: '120px' }}>
+                <div style={{ textAlign: 'center', position: 'relative' }}>
                     <AnimatePresence>{activeEmoji.O && <motion.div initial={{ scale: 0, y: 0 }} animate={{ scale: 2, y: -50 }} exit={{ scale: 0 }} style={{ position: 'absolute', width: '100%', top: 0, zIndex: 100 }}>{activeEmoji.O}</motion.div>}</AnimatePresence>
-                    <div className={`game-square ${!isXNext ? 'o' : ''}`} style={{ width: '80px', height: '80px', margin: '0 auto', opacity: !isXNext ? 1 : 0.2 }}>O</div>
-                    <p style={{ marginTop: '1rem', fontWeight: '900', letterSpacing: '2px', fontSize: '0.7rem', color: !isXNext ? 'var(--secondary)' : 'var(--text-muted)' }}>{mode === 'computer' ? 'NEURAL' : (mode === 'online' ? players?.[1] : 'BETA')}</p>
+                    <div className={`game-square ${!isXNext ? 'o' : ''}`} style={{ width: '70px', height: '70px', margin: '0 auto', opacity: !isXNext ? 1 : 0.2 }}>O</div>
+                    <p style={{ marginTop: '0.5rem', fontWeight: '900', letterSpacing: '2px', fontSize: '0.6rem', color: !isXNext ? 'var(--secondary)' : 'var(--text-muted)' }}>{mode === 'computer' ? 'NEURAL' : (mode === 'online' ? players?.[1] : 'BETA')}</p>
                 </div>
             </div>
 

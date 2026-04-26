@@ -169,10 +169,35 @@ h1, h2, h3 {
 
 /* Mobile Adjustments */
 @media (max-width: 768px) {
-  .glass-panel { padding: 1.5rem !important; border-radius: 24px; }
-  .game-board-container { gap: 10px; margin: 1rem auto; }
-  .game-square { border-radius: 12px; }
+  .battle-layout {
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    padding: 1rem;
+  }
+
+  .game-board-container {
+    max-width: 90vw !important;
+    gap: 10px !important;
+    margin: 1rem auto !important;
+    transform: rotateX(10deg) !important; /* Slightly flatter for mobile visibility */
+  }
+
+  .game-square {
+    border-radius: 12px;
+    font-size: 2rem !important;
+  }
+
+  .glass-panel { 
+    padding: 1.5rem !important; 
+    border-radius: 24px; 
+  }
+
   h1 { font-size: 1.5rem !important; }
+  
+  .dashboard-main {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
 }
 
 /* Custom Scrollbar */
