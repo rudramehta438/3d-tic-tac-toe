@@ -131,14 +131,16 @@ const Dashboard = () => {
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '900' }}>OPERATOR: {user?.username?.toUpperCase()}</p>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <motion.button 
-                        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
-                        onClick={() => setIsSocialOpen(true)}
-                        style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', padding: '0.8rem', borderRadius: '15px', color: 'white', cursor: 'pointer', position: 'relative' }}
-                    >
-                        <Users size={20} />
-                        {(friendRequests.length + invitations.length) > 0 && <span style={{ position: 'absolute', top: -5, right: -5, background: 'var(--accent)', width: '18px', height: '18px', borderRadius: '50%', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900' }}>{friendRequests.length + invitations.length}</span>}
-                    </motion.button>
+                    {!user?.isGuest && (
+                        <motion.button 
+                            whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                            onClick={() => setIsSocialOpen(true)}
+                            style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', padding: '0.8rem', borderRadius: '15px', color: 'white', cursor: 'pointer', position: 'relative' }}
+                        >
+                            <Users size={20} />
+                            {(friendRequests.length + invitations.length) > 0 && <span style={{ position: 'absolute', top: -5, right: -5, background: 'var(--accent)', width: '18px', height: '18px', borderRadius: '50%', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900' }}>{friendRequests.length + invitations.length}</span>}
+                        </motion.button>
+                    )}
                     <motion.button 
                         whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,0,85,0.1)' }} whileTap={{ scale: 0.9 }}
                         onClick={logout}
@@ -149,7 +151,7 @@ const Dashboard = () => {
                 </div>
             </motion.header>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem', maxWidth: '1400px', margin: '0 auto' }} className="dashboard-main">
+            <div style={{ display: 'grid', gridTemplateColumns: user?.isGuest ? '1fr' : '1fr 350px', gap: '2rem', maxWidth: '1400px', margin: '0 auto' }} className="dashboard-main">
                 {/* Left Side: Game Modes & Stats */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
@@ -191,30 +193,32 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Right Side: Leaderboard */}
-                <motion.div 
-                    initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-                    className="glass-panel" style={{ padding: '2rem' }}
-                >
-                    <h3 style={{ fontSize: '1rem', marginBottom: '2rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <Trophy size={18} /> THE ELITE THREE
-                    </h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {leaderboard.map((player, i) => (
-                            <div key={i} style={{ 
-                                display: 'flex', justifyContent: 'space-between', padding: '1rem', 
-                                background: 'rgba(255,255,255,0.02)', borderRadius: '15px',
-                                border: player.username === user?.username ? '1px solid var(--primary)' : '1px solid transparent'
-                            }}>
-                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                    <span style={{ color: i === 0 ? 'var(--primary)' : 'var(--text-muted)', fontWeight: '900' }}>#{i+1}</span>
-                                    <span style={{ fontSize: '0.9rem' }}>{player.username}</span>
+                {/* Right Side: Leaderboard (Hidden for Guests) */}
+                {!user?.isGuest && (
+                    <motion.div 
+                        initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+                        className="glass-panel" style={{ padding: '2rem' }}
+                    >
+                        <h3 style={{ fontSize: '1rem', marginBottom: '2rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <Trophy size={18} /> THE ELITE THREE
+                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            {leaderboard.map((player, i) => (
+                                <div key={i} style={{ 
+                                    display: 'flex', justifyContent: 'space-between', padding: '1rem', 
+                                    background: 'rgba(255,255,255,0.02)', borderRadius: '15px',
+                                    border: player.username === user?.username ? '1px solid var(--primary)' : '1px solid transparent'
+                                }}>
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                        <span style={{ color: i === 0 ? 'var(--primary)' : 'var(--text-muted)', fontWeight: '900' }}>#{i+1}</span>
+                                        <span style={{ fontSize: '0.9rem' }}>{player.username}</span>
+                                    </div>
+                                    <span style={{ color: 'var(--primary)', fontWeight: '700' }}>{player.stats.wins}W</span>
                                 </div>
-                                <span style={{ color: 'var(--primary)', fontWeight: '700' }}>{player.stats.wins}W</span>
-                            </div>
-                        ))}
-                    </div>
-                </motion.div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
             </div>
 
             {/* Social Drawer */}
