@@ -48,7 +48,7 @@ const Game = () => {
 
         const win = checkWinner(board);
         if (winner === 'Forfeit') return;
-        if (win) {
+        if (win && !winner) {
             setWinner(win);
             if (win === 'Draw') {
                 setStatus("NEURAL STALEMATE");
@@ -65,7 +65,7 @@ const Game = () => {
                     if (mode !== 'local') recordResult('loss');
                 }
             }
-        } else {
+        } else if (!win) {
             setStatus(`${isXNext ? 'X' : 'O'}'S CALCULATION`);
         }
     }, [board, isXNext]);
