@@ -133,8 +133,12 @@ const Game = () => {
 
     const recordResult = async (res) => {
         try {
+            const storedUser = JSON.parse(localStorage.getItem('user'));
+            const token = storedUser?.token;
+            if (!token) return;
+
             await axios.put(`${API_URL}/api/auth/stats`, { result: res }, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
         } catch (err) { console.error('Stats sync failed'); }
     };
