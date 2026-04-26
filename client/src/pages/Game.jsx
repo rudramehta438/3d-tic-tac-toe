@@ -239,9 +239,11 @@ const Game = () => {
                 </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.8rem', marginTop: '3rem' }}>
-                {EMOJIS.map(e => <motion.button key={e} whileHover={{ y: -5 }} onClick={() => { playSound('emoji'); socket.emit('send_emoji', { room, emoji: e, sender: user.username }); }} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', padding: '0.8rem', borderRadius: '12px', cursor: 'pointer', fontSize: '1.2rem' }}>{e}</motion.button>)}
-            </div>
+            {mode === 'online' && (
+                <div style={{ display: 'flex', gap: '0.8rem', marginTop: '3rem' }}>
+                    {EMOJIS.map(e => <motion.button key={e} whileHover={{ y: -5 }} onClick={() => { playSound('emoji'); socket.emit('send_emoji', { room, emoji: e, sender: user.username }); }} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', padding: '0.8rem', borderRadius: '12px', cursor: 'pointer', fontSize: '1.2rem' }}>{e}</motion.button>)}
+                </div>
+            )}
 
             <AnimatePresence>
                 {winner && (
