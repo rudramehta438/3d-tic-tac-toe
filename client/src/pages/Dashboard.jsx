@@ -154,22 +154,24 @@ const Dashboard = () => {
             <div style={{ display: 'grid', gridTemplateColumns: user?.isGuest ? '1fr' : '1fr 350px', gap: '2rem', maxWidth: '1400px', margin: '0 auto' }} className="dashboard-main">
                 {/* Left Side: Game Modes & Stats */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-                        {[
-                            { label: 'WINS', value: user?.stats?.wins || 0, color: 'var(--primary)', icon: Crown },
-                            { label: 'LOSSES', value: user?.stats?.losses || 0, color: 'var(--accent)', icon: Trophy },
-                            { label: 'RATIO', value: user?.stats?.totalGames > 0 ? ((user.stats.wins / user.stats.totalGames) * 100).toFixed(0) + '%' : '0%', color: 'var(--secondary)', icon: Monitor }
-                        ].map((stat, i) => (
-                            <motion.div 
-                                key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
-                                className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}
-                            >
-                                <stat.icon size={20} color={stat.color} style={{ marginBottom: '0.5rem' }} />
-                                <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', letterSpacing: '2px' }}>{stat.label}</p>
-                                <h3 style={{ fontSize: '2rem', color: stat.color }}>{stat.value}</h3>
-                            </motion.div>
-                        ))}
-                    </div>
+                    {!user?.isGuest && (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                            {[
+                                { label: 'WINS', value: user?.stats?.wins || 0, color: 'var(--primary)', icon: Crown },
+                                { label: 'LOSSES', value: user?.stats?.losses || 0, color: 'var(--accent)', icon: Trophy },
+                                { label: 'RATIO', value: user?.stats?.totalGames > 0 ? ((user.stats.wins / user.stats.totalGames) * 100).toFixed(0) + '%' : '0%', color: 'var(--secondary)', icon: Monitor }
+                            ].map((stat, i) => (
+                                <motion.div 
+                                    key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
+                                    className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}
+                                >
+                                    <stat.icon size={20} color={stat.color} style={{ marginBottom: '0.5rem' }} />
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', letterSpacing: '2px' }}>{stat.label}</p>
+                                    <h3 style={{ fontSize: '2rem', color: stat.color }}>{stat.value}</h3>
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }} className="game-modes-grid">
                         <motion.div 
